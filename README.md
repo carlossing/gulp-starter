@@ -47,5 +47,19 @@ var config = {
 ```
 ## Commands:
 
+Build
+```bash
+gulp build
+```
+
+Run watch command
+```bash
+gulp watch
+```
+
+Run unit test
+```bash
+gulp test
+```
 
 
