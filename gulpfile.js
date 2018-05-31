@@ -1,5 +1,6 @@
 var gulp = require('gulp');
 var less = require('gulp-less');
+var watch = require('gulp-watch');
 var minifyCSS = require('gulp-csso');
 var concat = require('gulp-concat');
 var sourcemaps = require('gulp-sourcemaps');
@@ -11,18 +12,21 @@ var htmlMin = require('gulp-htmlmin');
 var del = require('del');
 var browserSync = require('browser-sync');
 var sequence = require('run-sequence');
+var htmlReplace = require('gulp-html-replace');
+var qunit = require('gulp-qunit');
 
 var config = {
 
     cssIn: [
-        'src/*.less',
-        'src/start-template.css'
+        'src/css/*.less',
+        'src/css/start-template.css'
     ],
     cssOut:'build/css',
     cssFileName: 'styles.min.css',
+    cssReplaceOut: 'css/styles.min.css',
     jsIn: [
-        'src/app1.js',
-        'src/app2.js'
+        'src/js/app1.js',
+        'src/js/app2.js'
     ],
     htmlIn: [
         'src/index.html',
@@ -33,6 +37,11 @@ var config = {
     jsFileName:'app.min.js',
     jsOut:'build/js',
     jsOutExt: '.js',
+    jsReplaceOut: 'js/app.min.js',
+    src: 'src',
+    testIn: [
+       'src/test/*.html'
+    ],
     uglifyConfig: {
         compress: {
             drop_console:true
@@ -46,27 +55,25 @@ var config = {
 
 };
 
-gulp.task('default', function() {
-    return del('build');
-});
-
 gulp.task('clean', function() {
     return del('build');
 });
 
 gulp.task('css', function(){
+    del(config.cssOut)
     return gulp.src(config.cssIn)
-      .pipe(less())
-      .pipe(minifyCSS())
-      .pipe(concat(config.cssFileName))
-      .pipe(gulp.dest(config.cssOut))
+        .pipe(less())
+        .pipe(minifyCSS())
+        .pipe(concat(config.cssFileName))
+        .pipe(gulp.dest(config.cssOut))
 });
 
 gulp.task('js', function(cb){
+    del(config.jsOut)
     return gulp.src(config.jsIn)
-        .pipe(cleanDest(config.jsOut, {
-            extension: config.jsOutExt
-        }))
+        // .pipe(cleanDest(config.jsOut, {
+        //     extension: config.jsOutExt
+        // }))
         .pipe(sourcemaps.init())
         .pipe(concat(config.jsFileName))
         .pipe(uglify(config.uglifyConfig))
@@ -84,47 +91,50 @@ gulp.task('image',function(){
 gulp.task('html',function(){
 
     return gulp.src(config.htmlIn)
-    .pipe(htmlMin({
-        sortAttributes: true,
-        sortClassName: true,
-        collapseWhitespace: true,
-        removeComments: true
+    .pipe(htmlReplace({
+        'css': config.cssReplaceOut,
+        'js': config.jsReplaceOut
       }))
+    // .pipe(htmlMin({
+    //     sortAttributes: true,
+    //     sortClassName: true,
+    //     collapseWhitespace: true,
+    //     removeComments: true
+    //   }))
         .pipe(gulp.dest(config.htmlOut))
 });
 
-/*
 gulp.task('reload', function() {
     browserSync.reload();
-  });
-  
-  gulp.task('serve', ['sass'], function() {
+});
+
+gulp.task('serve', ['css'], function() {
     browserSync({
       server: config.src
     });
   
-    gulp.watch([config.htmlin, config.jsin], ['reload']);
-    gulp.watch(config.scssin, ['sass']);
-  });
-*/
-  
-/*
-gulp.task('compress', function (cb) {
-    pump([
-          gulp.src('src/*.js'),
-          uglify(),
-          gulp.dest('dist')
-      ],
-      cb
-    );
+    gulp.watch([config.htmlIn, config.jsIn], ['reload']);
+    gulp.watch(config.cssIn, ['css']);
 });
-*/  
-gulp.task('watch', function (cb) {
-   
+
+
+gulp.task('watch', function () {
+
+    gulp.watch([config.htmlIn], ['html']);
+    gulp.watch([config.jsIn], ['js']);
+    gulp.watch([ config.cssIn], ['css']);
 });
 
 gulp.task('build', function() {
     sequence('clean', ['css','js','image','html']);
 });
+
+gulp.task('test', function() {
+    return gulp.src(config.testIn)
+        .pipe(qunit());
+});
+
+gulp.task('default', ['serve']);
+
 
 //gulp.task('default', ['clean', 'css','js','image','html']);
