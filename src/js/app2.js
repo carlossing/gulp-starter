@@ -1,6 +1,3 @@
 /**
- * APP 2
+ * Script 2
  */
-var demon = 'AmbuOps';
-
-console.debug(demon);

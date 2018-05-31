@@ -71,9 +71,6 @@ gulp.task('css', function(){
 gulp.task('js', function(cb){
     del(config.jsOut)
     return gulp.src(config.jsIn)
-        // .pipe(cleanDest(config.jsOut, {
-        //     extension: config.jsOutExt
-        // }))
         .pipe(sourcemaps.init())
         .pipe(concat(config.jsFileName))
         .pipe(uglify(config.uglifyConfig))
@@ -135,6 +132,3 @@ gulp.task('test', function() {
 });
 
 gulp.task('default', ['serve']);
-
-
-//gulp.task('default', ['clean', 'css','js','image','html']);
