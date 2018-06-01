@@ -4,7 +4,7 @@ Template for starter project for Javascript, Less.
 
 ## Install
 
-```bash
+```shell
 git clone https://github.com/cjies/gulp-starter-kit
 
 cd gulp-starter-kit
